@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fallas Diemar · Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #0B1220;
+    --bg-soft:    #111A2E;
+    --card:       #17233D;
+    --card-hover: #1C2A49;
+    --border:     #253351;
+    --text:       #E6EAF2;
+    --muted:      #8B94A8;
+    --primary:    #E85A26;       /* naranja Diemar */
+    --primary-dark: #C84A1C;
+    --danger:     #F87171;
+    --danger-bg:  rgba(248,113,113,0.12);
+    --success:    #34D399;
+    --success-bg: rgba(52,211,153,0.12);
+    --info:       #60A5FA;
+    --info-bg:    rgba(96,165,250,0.12);
+    --shadow:     0 4px 14px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.2);
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0B1220 0%, #1A2742 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand img {
+    height: 46px;
+    width: auto;
+    object-fit: contain;
+  }
+  .brand-text h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .brand-text .subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .btn {
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-ghost { background: rgba(255,255,255,.06); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: rgba(255,255,255,.1); }
+  .btn-success { background: var(--success); color: #0B1220; }
+  .btn-success:hover { background: #2BC084; }
+  .btn-danger { background: var(--danger); color: #0B1220; }
+  .btn-danger:hover { background: #F05D5D; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 28px; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .stat {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--info);
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .stat:hover { transform: translateY(-2px); }
+  .stat.pendiente { border-left-color: var(--danger); }
+  .stat.realizado { border-left-color: var(--success); }
+  .stat.patentes  { border-left-color: var(--primary); }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 0.8px;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 30px;
+    font-weight: 700;
+    margin-top: 6px;
+    color: var(--text);
+  }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search {
+    flex: 1;
+    min-width: 220px;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    background: var(--card);
+    color: var(--text);
+  }
+  .search::placeholder { color: var(--muted); }
+  .search:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(232,90,38,0.15);
+  }
+
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .tab {
+    padding: 11px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .tab:hover { background: var(--card-hover); color: var(--text); }
+  .tab.active { background: var(--primary); color: #fff; }
+
+  .patente-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .patente-header {
+    padding: 16px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .patente-header:hover { background: var(--card-hover); }
+  .patente-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 0.3px;
+  }
+  .patente-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .patente-badges {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .badge-pendiente { background: var(--danger-bg); color: var(--danger); }
+  .badge-realizado { background: var(--success-bg); color: var(--success); }
+  .chevron {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 10px;
+    transition: transform 0.2s;
+  }
+  .patente-card.collapsed .chevron { transform: rotate(-90deg); }
+  .patente-card.collapsed .falla-list { display: none; }
+
+  .falla-list { padding: 0; }
+  .falla {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .falla:last-child { border-bottom: none; }
+  .falla:hover { background: rgba(255,255,255,0.02); }
+  .falla-info { min-width: 0; }
+  .falla-header-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .falla-fecha {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .falla-chofer {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .falla-km {
+    font-size: 11px;
+    color: var(--info);
+    background: var(--info-bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .falla-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 8px 0;
+  }
+  .chip {
+    font-size: 11px;
+    padding: 3px 9px;
+    background: rgba(232,90,38,0.12);
+    color: var(--primary);
+    border-radius: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(232,90,38,0.25);
+  }
+  .falla-desc {
+    font-size: 13px;
+    color: #C7CEDB;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.55;
+  }
+  .falla-imagen {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--info);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .falla-imagen:hover { text-decoration: underline; }
+  .falla-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+  }
+  .btn-sm { padding: 7px 12px; font-size: 12px; }
+
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+  }
+  .loading {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+  }
+  .spinner {
+    display: inline-block;
+    width: 28px; height: 28px;
+    border: 3px solid rgba(232,90,38,0.2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1A2742;
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.4);
+    border: 1px solid var(--border);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.success {
+    background: var(--success);
+    color: #0B1220;
+    border-color: var(--success);
+  }
+  .toast.error {
+    background: var(--danger);
+    color: #0B1220;
+    border-color: var(--danger);
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 16px; }
+    header { padding: 14px 16px; }
+    .brand img { height: 38px; }
+    .brand-text h1 { font-size: 16px; }
+    .falla { grid-template-columns: 1fr; }
+    .falla-actions {
+      flex-direction: row;
+      align-items: center;
+    }
+    .stat-value { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="logo.png" alt="Diemar" onerror="this.style.display='none'" />
+      <div class="brand-text">
+        <h1>Dashboard de Fallas</h1>
+        <div class="subtitle" id="lastUpdate">Cargando...</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-ghost" onclick="cargarDatos()">🔄 Actualizar</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total fallas</div>
+        <div class="stat-value" id="stat-total">–</div>
+      </div>
+      <div class="stat pendiente">
+        <div class="stat-label">Pendientes</div>
+        <div class="stat-value" id="stat-pendientes">–</div>
+      </div>
+      <div class="stat realizado">
+        <div class="stat-label">Realizadas</div>
+        <div class="stat-value" id="stat-realizadas">–</div>
+      </div>
+      <div class="stat patentes">
+        <div class="stat-label">Unidades</div>
+        <div class="stat-value" id="stat-patentes">–</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input class="search" id="search" placeholder="🔍 Buscar por patente, chofer, descripción..." oninput="renderizar()" />
+      <div class="tabs">
+        <button class="tab active" data-filtro="pendiente" onclick="setFiltro('pendiente')">Pendientes</button>
+        <button class="tab" data-filtro="realizado" onclick="setFiltro('realizado')">Realizadas</button>
+        <button class="tab" data-filtro="todas" onclick="setFiltro('todas')">Todas</button>
+      </div>
+    </div>
+
+    <div id="contenido">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>Cargando fallas...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  // =====================================================
+  // CONFIGURACION
+  // =====================================================
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzXWNUxusVyC8uWfRLKhUpMCIhfRlBnZcy4QxHp-Uvsp_U69lRjel6698ltBFeimUU/exec';
+  const API_KEY = 'diemar-fallas-2026';
+  // =====================================================
+
+  let DATOS = [];
+  let FILTRO = 'pendiente';
+
+  async function cargarDatos() {
+    try {
+      document.getElementById('contenido').innerHTML = '<div class="loading"><div class="spinner"></div><div>Cargando fallas...</div></div>';
+      const r = await fetch(API_URL);
+      const json = await r.json();
+      if (!json.ok) throw new Error(json.error || 'Error del servidor');
+      DATOS = json.data || [];
+      const d = new Date(json.updatedAt);
+      document.getElementById('lastUpdate').textContent =
+        'Actualizado: ' + d.toLocaleString('es-AR');
+      actualizarStats();
+      renderizar();
+    } catch (err) {
+      document.getElementById('contenido').innerHTML =
+        '<div class="empty">❌ Error cargando datos: ' + err.message + '<br><br>' +
+        '<small>Revisá que el API_URL esté correcto en el index.html</small></div>';
+    }
+  }
+
+  function getCampo(fila, nombres) {
+    for (const n of nombres) {
+      if (fila[n] !== undefined && fila[n] !== null && fila[n] !== '') return fila[n];
+    }
+    return '';
+  }
+
+  function normalizarFila(f) {
+    return {
+      marcaTemporal: getCampo(f, ['Marca temporal']),
+      fecha:         getCampo(f, ['Fecha','FECHA']),
+      chofer:        getCampo(f, ['Chofer','NOMBRE Y APELLIDO']),
+      imagen:        getCampo(f, ['Imagen','ADJUNTA IMAGEN (OPCIONAL)']),
+      patente:       getCampo(f, ['Patente','PATENTE']),
+      km:            getCampo(f, ['KM','KM ACTUAL (si corresponde)']),
+      fallas:        getCampo(f, ['Fallas','FALLAS']),
+      descripcion:   getCampo(f, ['Descripción','DESCRIPCION DE LA FALLA / OBSERVACIONES (OPCIONAL)']),
+      estado:        getCampo(f, ['Estado','ESTADO']) || 'Pendiente'
+    };
+  }
+
+  function actualizarStats() {
+    const filas = DATOS.map(normalizarFila);
+    const pend = filas.filter(f => /pend/i.test(f.estado)).length;
+    const real = filas.filter(f => /realiz/i.test(f.estado)).length;
+    const pats = new Set(filas.map(f => (f.patente||'').toString().toUpperCase().replace(/[\s\.\-]/g,'')).filter(p => p)).size;
+    document.getElementById('stat-total').textContent = filas.length;
+    document.getElementById('stat-pendientes').textContent = pend;
+    document.getElementById('stat-realizadas').textContent = real;
+    document.getElementById('stat-patentes').textContent = pats;
+  }
+
+  function setFiltro(f) {
+    FILTRO = f;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.filtro === f));
+    renderizar();
+  }
+
+  function formatearFecha(valor) {
+    if (!valor) return '-';
+    const d = new Date(valor);
+    if (isNaN(d.getTime())) return valor.toString();
+    return d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  }
+
+  function renderizar() {
+    const busqueda = document.getElementById('search').value.toLowerCase().trim();
+
+    let filas = DATOS.map(normalizarFila).filter(f => f.patente);
+
+    if (FILTRO === 'pendiente') filas = filas.filter(f => /pend/i.test(f.estado));
+    if (FILTRO === 'realizado') filas = filas.filter(f => /realiz/i.test(f.estado));
+
+    if (busqueda) {
+      filas = filas.filter(f => {
+        const blob = [f.patente, f.chofer, f.fallas, f.descripcion].join(' ').toLowerCase();
+        return blob.indexOf(busqueda) >= 0;
+      });
+    }
+
+    // agrupar por patente
+    const grupos = {};
+    filas.forEach(f => {
+      const key = (f.patente||'').toString().toUpperCase().replace(/[\s\.\-]/g,'');
+      if (!grupos[key]) grupos[key] = { patente: key, fallas: [] };
+      grupos[key].fallas.push(f);
+    });
+
+    // ordenar grupos
+    const gruposArr = Object.values(grupos).sort((a, b) => {
+      const pa = a.fallas.filter(f => /pend/i.test(f.estado)).length;
+      const pb = b.fallas.filter(f => /pend/i.test(f.estado)).length;
+      if (pb !== pa) return pb - pa;
+      return a.patente.localeCompare(b.patente);
+    });
+
+    // ordenar fallas dentro de cada grupo
+    gruposArr.forEach(g => {
+      g.fallas.sort((a,b) => new Date(b.marcaTemporal) - new Date(a.marcaTemporal));
+    });
+
+    const cont = document.getElementById('contenido');
+    if (!gruposArr.length) {
+      cont.innerHTML = '<div class="empty">✨ No hay fallas que coincidan con los filtros.</div>';
+      return;
+    }
+
+    cont.innerHTML = gruposArr.map(g => {
+      const pend = g.fallas.filter(f => /pend/i.test(f.estado)).length;
+      const real = g.fallas.filter(f => /realiz/i.test(f.estado)).length;
+      return `
+        <div class="patente-card" id="card-${g.patente}">
+          <div class="patente-header" onclick="toggleCard('${g.patente}')">
+            <div>
+              <div class="patente-title">${g.patente}</div>
+              <div class="patente-meta">${g.fallas.length} registro${g.fallas.length===1?'':'s'}</div>
+            </div>
+            <div class="patente-badges">
+              ${pend ? `<span class="badge badge-pendiente">${pend} pendiente${pend===1?'':'s'}</span>` : ''}
+              ${real ? `<span class="badge badge-realizado">${real} realizada${real===1?'':'s'}</span>` : ''}
+              <span class="chevron">▼</span>
+            </div>
+          </div>
+          <div class="falla-list">
+            ${g.fallas.map(f => renderFalla(f)).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderFalla(f) {
+    const fallasArr = (f.fallas||'').toString().split(',').map(x=>x.trim()).filter(Boolean);
+    const esPendiente = /pend/i.test(f.estado);
+    const tsEsc = encodeURIComponent(f.marcaTemporal);
+
+    return `
+      <div class="falla">
+        <div class="falla-info">
+          <div class="falla-header-row">
+            <span class="falla-fecha">${formatearFecha(f.fecha || f.marcaTemporal)}</span>
+            <span class="falla-chofer">· ${escapeHtml(f.chofer || '-')}</span>
+            ${f.km ? `<span class="falla-km">KM ${escapeHtml(f.km.toString())}</span>` : ''}
+            <span class="badge ${esPendiente?'badge-pendiente':'badge-realizado'}">${f.estado}</span>
+          </div>
+          <div class="falla-chips">
+            ${fallasArr.map(x => `<span class="chip">${escapeHtml(x)}</span>`).join('')}
+          </div>
+          ${f.descripcion ? `<div class="falla-desc">${escapeHtml(f.descripcion)}</div>` : ''}
+          ${(f.imagen && f.imagen.toString().indexOf('http') === 0)
+             ? `<a class="falla-imagen" href="${f.imagen}" target="_blank">📷 Ver imagen adjunta</a>` : ''}
+        </div>
+        <div class="falla-actions">
+          ${esPendiente
+            ? `<button class="btn btn-success btn-sm" onclick="cambiarEstado('${tsEsc}','Realizado', this)">✅ Marcar realizado</button>`
+            : `<button class="btn btn-danger btn-sm" onclick="cambiarEstado('${tsEsc}','Pendiente', this)">↩️ Reabrir</button>`
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  function toggleCard(patente) {
+    document.getElementById('card-' + patente).classList.toggle('collapsed');
+  }
+
+  async function cambiarEstado(marcaTemporalEnc, nuevoEstado, btn) {
+    const marcaTemporal = decodeURIComponent(marcaTemporalEnc);
+    btn.disabled = true;
+    btn.textContent = '⏳ Guardando...';
+    try {
+      const r = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'setEstado',
+          apiKey: API_KEY,
+          marcaTemporal: marcaTemporal,
+          estado: nuevoEstado
+        })
+      });
+      const json = await r.json();
+      if (!json.ok) throw new Error(json.error || 'Error del servidor');
+      showToast('✅ Estado actualizado', 'success');
+
+      const fila = DATOS.find(d => {
+        const ts = d['Marca temporal'];
+        return new Date(ts).getTime() === new Date(marcaTemporal).getTime();
+      });
+      if (fila) {
+        if ('Estado' in fila) fila['Estado'] = nuevoEstado;
+        if ('ESTADO' in fila) fila['ESTADO'] = nuevoEstado;
+      }
+      actualizarStats();
+      renderizar();
+    } catch (err) {
+      showToast('❌ ' + err.message, 'error');
+      btn.disabled = false;
+      btn.textContent = nuevoEstado === 'Realizado' ? '✅ Marcar realizado' : '↩️ Reabrir';
+    }
+  }
+
+  function showToast(msg, tipo) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + (tipo || '');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function escapeHtml(s) {
+    return (s == null ? '' : s.toString())
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  cargarDatos();
+</script>
+</body>
+</html>
