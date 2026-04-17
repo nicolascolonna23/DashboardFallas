@@ -160,6 +160,12 @@
     renderizar();
   }
 
+  function formatFecha(fechaRaw) {
+    if (!fechaRaw) return '';
+    const d = new Date(fechaRaw);
+    return isNaN(d.getTime()) ? fechaRaw : d.toLocaleDateString('es-AR');
+  }
+
   async function cambiarEstado(marcaTemporal, nuevoEstado, btn) {
     btn.disabled = true;
     btn.textContent = '⏳...';
@@ -234,10 +240,11 @@
           ${grupos[p].map(f => {
             const esPend = /pend/i.test(f.Estado || f.ESTADO);
             const ts = f['Marca temporal'];
+            const fechaLimpia = formatFecha(f.Fecha || f.FECHA || ts);
             return `
             <div class="falla">
               <div>
-                <div style="font-weight:600">${f.Chofer || f['NOMBRE Y APELLIDO'] || 'Chofer'} - <span style="color:var(--muted)">${f.Fecha || ''}</span></div>
+                <div style="font-weight:600">${f.Chofer || f['NOMBRE Y APELLIDO'] || 'Chofer'} - <span style="color:var(--muted)">${fechaLimpia}</span></div>
                 <div class="falla-desc">${f.Fallas || f.FALLAS || ''}</div>
               </div>
               <div>
